@@ -1,0 +1,34 @@
+MathJax={
+   loader: {load: ['[tex]/color','[tex]/cancel','[tex]/enclose']},
+   tex: {
+      inlineMath: [['$', '$'],['\\(','\\)']],
+      packages: {'[+]': ['color','cancel','enclose']},
+      macros: {
+         degree: "{^\\circ}",
+         dmn: "\\ \\middle\\vert\\ "
+      }
+   },
+   options:{
+      skipHtmlTags: ["script","noscript","style","textarea","pre","code"]
+   }
+};
+
+
+
+
+function isihtml(elementId, html) {
+   var element = document.getElementById(elementId);
+   if (element) {
+     element.innerHTML = html;
+   }
+ }
+ 
+ //mengganti stringAwal dengan stringPengganti pada div dengan id divId
+ function gantiString(divId, stringAwal, stringPengganti) {
+   var div = document.getElementById(divId);
+   if (div) {
+       div.innerHTML = div.innerHTML.replace(new RegExp(stringAwal, 'g'), stringPengganti);
+   } else {
+       console.log("Tidak ada elemen dengan ID: " + divId);
+   }
+}
