@@ -21,7 +21,7 @@
   <p id="responseMessage"></p>
 
   <script>
-    const form = document.getElementById('contactForm');
+   
     const scriptURL = 'https://script.google.com/macros/s/AKfycbyFyjefTj7KZAepFvMhI4SkPXLfUIuplHxclos6Yt0rwUP4P42m1-UmjYz3jakftHKizw/exec'; // Ganti dengan URL Web App dari Apps Script
 
     form.addEventListener('submit', e => {
@@ -33,11 +33,16 @@
         pesan: form.pesan.value
       };
 
-      fetch(scriptURL, {
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers: { 'Content-Type': 'application/json' }
-      })
+      const form = new FormData();
+form.append('nama', 'Nama');
+form.append('email', 'Email');
+form.append('pesan', 'Pesan');
+
+fetch('https://script.google.com/macros/s/AKfycbyFyjefTj7KZAepFvMhI4SkPXLfUIuplHxclos6Yt0rwUP4P42m1-UmjYz3jakftHKizw/exec', {
+  method: 'POST',
+  body: form // Tanpa Content-Type manual
+});
+
       .then(response => document.getElementById("responseMessage").innerText = "Pesan berhasil dikirim!")
       .catch(error => document.getElementById("responseMessage").innerText = "Terjadi kesalahan.");
     });
