@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Penjumlahan dan Pengurangan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .card {
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+        }
+        .btn {
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .option {
+            transition: all 0.2s ease;
+        }
+        .option:hover {
+            transform: scale(1.02);
+        }
+        .timer-bar {
+            height: 8px;
+            background-color: #4ade80;
+            border-radius: 4px;
+            transition: width 0.1s linear;
+        }
+        select {
+            text-transform: uppercase;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        .score-display {
+            font-size: 4rem;
+            font-weight: bold;
+            text-align: center;
+            color: #4f46e5;
+            padding: 1rem 0;
+        }
+        .select-wrapper {
+            position: relative;
+        }
+        .select-wrapper::after {
+            content: '▼';
+            font-size: 0.8rem;
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+    <div class="container py-8 px-4 md:px-0">
+        <!-- Start Page -->
+        <div id="start-page" class="card fade-in">
+            <h1 class="text-3xl md:text-4xl font-bold text-center text-indigo-600 mb-6">KUIS PENJUMLAHAN DAN PENGURANGAN</h1>
+            
+            <div class="bg-indigo-50 p-4 rounded-lg mb-6">
+                <h2 class="font-bold text-xl mb-2">Petunjuk:</h2>
+                <ul class="list-disc pl-5 space-y-2">
+                    <li>Kuis terdiri dari 15 soal penjumlahan dan pengurangan.</li>
+                    <li>Setiap soal memiliki waktu 10 detik untuk menjawab.</li>
+                    <li>Klik pada pilihan jawaban yang benar.</li>
+                    <li>Nilai minimal untuk lulus adalah 80.</li>
+                    <li>Jika waktu habis, soal akan otomatis berganti.</li>
+                </ul>
+            </div>
+            
+            <div class="mb-6">
+                <div class="mb-4">
+                    <label for="kelas" class="block text-lg font-medium mb-2">Kelas:</label>
+                    <div class="select-wrapper">
+                        <select id="kelas" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none bg-white">
+                            <option value="" selected disabled>PILIH KELAS</option>
+				<option value="10TSM2">10 TSM 2</option>
+                            <option value="11MP1">11 MP 1</option>
+                            <option value="11MP2">11 MP 2</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="nama-container" class="mb-4 hidden">
+                    <label for="nama" class="block text-lg font-medium mb-2">Nama Lengkap:</label>
+                    <div class="select-wrapper">
+                        <select id="nama" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none bg-white">
+                            <option value="" selected disabled>PILIH NAMA</option>
+                            <!-- Nama siswa akan diisi secara dinamis -->
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="start-btn" class="btn w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg hidden">MULAI</button>
+        </div>
+        
+        <!-- Quiz Page -->
+        <div id="quiz-page" class="card hidden fade-in">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Soal <span id="current-question">1</span>/15</h2>
+                <div class="text-lg font-medium">Waktu: <span id="timer">10</span> detik</div>
+            </div>
+            
+            <div class="w-full bg-gray-200 rounded-full mb-6">
+                <div id="timer-bar" class="timer-bar w-full"></div>
+            </div>
+            
+            <div id="question-container" class="text-2xl md:text-3xl font-bold text-center my-8"></div>
+            
+            <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <!-- Options will be inserted here -->
+            </div>
+        </div>
+        
+        <!-- Result Page -->
+        <div id="result-page" class="card hidden fade-in">
+            <h1 class="text-3xl font-bold text-center text-indigo-600 mb-6">HASIL KUIS</h1>
+            
+            <div class="bg-indigo-50 p-6 rounded-lg mb-6">
+                <p class="text-xl mb-2">NAMA: <span id="result-nama" class="font-bold"></span></p>
+                
+                <div class="my-6">
+                    <p class="text-center text-lg mb-1">NILAI:</p>
+                    <div class="score-display"><span id="result-nilai"></span>/100</div>
+                </div>
+                
+                <div class="grid grid-cols-3 gap-4 text-center my-6">
+                    <div class="bg-green-100 p-3 rounded-lg">
+                        <p class="text-lg">Benar</p>
+                        <p id="result-benar" class="text-2xl font-bold text-green-600"></p>
+                    </div>
+                    <div class="bg-red-100 p-3 rounded-lg">
+                        <p class="text-lg">Salah</p>
+                        <p id="result-salah" class="text-2xl font-bold text-red-600"></p>
+                    </div>
+                    <div class="bg-gray-100 p-3 rounded-lg">
+                        <p class="text-lg">Tidak Dijawab</p>
+                        <p id="result-kosong" class="text-2xl font-bold text-gray-600"></p>
+                    </div>
+                </div>
+                
+                <div id="result-status" class="mt-6 p-4 rounded-lg text-center text-xl font-bold"></div>
+            </div>
+            
+            <button id="retry-btn" class="btn w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg">ULANGI</button>
+        </div>
+    </div>
+
+    <script>
+        // Data siswa
+        const dataSiswa = {
+		"10TSM2":["A. JEJE PRANATA","ADE PAMUNGKAS","ADIT MAHARDHIKA PRATAMA","ADITYA SAPUTRA","AKBAR AL FARIZI","ARDIAN ILHAM NARENDRA","ARYAN BILLY RAMADHAN","AZRI PUTRA NOOR","BAIHAQQI PUTRA ADHI","BRUNO CHALVIN FALLO","DANDY RISKYANTO","DENIS FIRDANTA","DHIO RAZKIAWAN","EKO BUDIONO","FAIRUS SAPUTRA SETIALAM","FAJAR NUGROHO","FATHAA DWI RAMADHAN","GALIH WINARKO","JHOSUA DWI ANDIKA PASARIBU","KAGENDRA YUDHA KURNIAWAN","KHAIVIN ARSYAD FAQIH","MIFTAHUL RIZKI YANDA","MOHAMAD RESKI FIRMANSYAH","MUHAMMAD ABID","MUHAMMAD AL FATHIR","MUHAMMAD FAHRI ALGIFARI","MUHAMMAD FARIZ ALIANSYAH","MUHAMMAD NURIL FAHMI","MUHAMMAD RIZKY FADILLAH","MUHAMMAD TEGUH FIRMANSYAH","PUTRA RADITYA","RAMADHAN KHAERONI","RANGGA RAMA INDRAYANA","RICO BRAYEN ADITYA PUTRA","WISNU DINATA","XAVIER ATALLAH RAJENDRA DARAJAT"],
+            "11MP1": [
+                "ADRIAN REVI MILANO", "AISYAH MARDIAN NINGSIH", "AJENG SRI RAHAYU", "ALIFA MAYA ESFANDIAR", 
+                "AOLA ZAHRA ARSELINA", "ARIA SUTARI", "ARSYIL JUNIO RAHMAN", "BUNGA DWIYATI ARTHOMO", 
+                "DEA ZULAEKAH", "DECHA HANDAYANI", "DINI APRILIA PUTRI", "ECHA DWI INDRIANI", 
+                "ELRI NOFIANA PUTRI", "ENOK ZAHRA", "EVAN SETIAWAN", "FARID KHALIMSYAH", 
+                "FEBRIANA ZAHRA SYAFITA", "FRISCA FRISILLA", "KANTANI", "LU'LU LUSIANA", 
+                "MAIDA RESTU HANDAYANI", "NAYRATUL FITRI CANTIKA", "NICEN SETIA NINGRUM", 
+                "NURUL FITRI OKTAVIANI", "RAHMA FEBRIANTI", "RARA AURA ARUM NINGTYAS", 
+                "RATU KINTAN CHOIRUNISSA", "REZA ADI SAPUTRA", "RONAL WIJAYA", "SILVA MAULIDA", 
+                "SITI MUSFIROH", "SYASQIATUS SHOLLAH", "VINA NOVIA ANGGRAYNI", 
+                "YASYHADUHUL PUTRI DINUR", "ZAIDAN AL KHAIRANZ", "ZILFA NIDA ULWAHDA"
+            ],
+            "11MP2": [
+                "AIRA PUTRI RAMADHANI", "AJENG AGUSTINA TRI KUSUMA", "ALANG MALIKA JALUNATA", 
+                "ALYKHA RAIHANNUR APRILIANTI", "ANISA MEYLANI PUTRI", "ANNISA ZAHRA HERMANTO", 
+                "ARIF RAHMAN SHALEH", "AURA FATHUN NISSA", "BILQIS AL ZAHRA", "CHESIA SALSHABILLA", 
+                "CINTA LAORA OKTHAVIA SARI", "DELTA INDAH ANGGREINI", "DHISA ANDREYNATA", 
+                "FRISKA FEBIA", "GEISHA NURUL HIKMAH", "IBRAHIM ADAM", "KANAYA ALDHIRA CANIAGO", 
+                "KEISHA DWI ANINDYA", "KHOIRUL MUSTOFA", "LUTFIANA DEL SHYFA", "MAY SAROH", 
+                "MELINDA", "NAMIRA ULFI", "NURUL AULIA EKA PUTRI", "PUTRI AMELIA SYAKINAH", 
+                "QIARA RAHMA WATI", "RAHMA MUTIARA AGUSTI", "RANI LAELA SYIFA", 
+                "RATU NENGQITA SALSABILLAH", "RIANI AYU RAHMADHANI", "RIFALATUS SALWA HAYATI", 
+                "SARTIKA", "SITI NURMAYANTI", "SITI SAITUN LUPUS", "TITIN MUFIDHOH CHAIRUNNISA", 
+                "TYAS LARASATI"
+            ]
+        };
+        
+        // Quiz data and state
+        const quizData = {
+            questions: [],
+            currentQuestion: 0,
+            correctAnswers: 0,
+            wrongAnswers: 0,
+            unanswered: 0,
+            timer: null,
+            timeLeft: 10,
+            a: 0,
+            b: 0,
+            userName: "",
+            userClass: ""
+        };
+        
+        // DOM Elements
+        const startPage = document.getElementById('start-page');
+        const quizPage = document.getElementById('quiz-page');
+        const resultPage = document.getElementById('result-page');
+        const startBtn = document.getElementById('start-btn');
+        const retryBtn = document.getElementById('retry-btn');
+        const kelasSelect = document.getElementById('kelas');
+        const namaContainer = document.getElementById('nama-container');
+        const namaSelect = document.getElementById('nama');
+        const questionContainer = document.getElementById('question-container');
+        const optionsContainer = document.getElementById('options-container');
+        const currentQuestionEl = document.getElementById('current-question');
+        const timerEl = document.getElementById('timer');
+        const timerBar = document.getElementById('timer-bar');
+        
+        // Click sound effect
+        const clickSound = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==");
+        
+        // Event listeners for dropdowns
+        kelasSelect.addEventListener('change', function() {
+            const selectedClass = this.value;
+            if (selectedClass) {
+                // Populate nama dropdown
+                namaSelect.innerHTML = '<option value="" selected disabled>PILIH NAMA</option>';
+                dataSiswa[selectedClass].forEach(nama => {
+                    const option = document.createElement('option');
+                    option.value = nama;
+                    option.textContent = nama;
+                    namaSelect.appendChild(option);
+                });
+                
+                // Show nama dropdown
+                namaContainer.classList.remove('hidden');
+                
+                // Hide start button
+                startBtn.classList.add('hidden');
+            }
+        });
+        
+        namaSelect.addEventListener('change', function() {
+            const selectedName = this.value;
+            if (selectedName) {
+                // Show start button
+                startBtn.classList.remove('hidden');
+            } else {
+                // Hide start button
+                startBtn.classList.add('hidden');
+            }
+        });
+        
+        // Generate questions
+        function generateQuestions() {
+            // Generate random values for a and b
+            quizData.a = Math.floor(Math.random() * 4) + 2; // 2 to 5
+            quizData.b = Math.floor(Math.random() * 4) + 6; // 6 to 9
+            
+            const a = quizData.a;
+            const b = quizData.b;
+            
+            // Create all 15 question types
+            const questionTemplates = [
+                { text: `${a} + ${b} = ....`, answer: a + b },
+                { text: `${a} - ${b} = ....`, answer: a - b },
+                { text: `${b} - ${a} = ....`, answer: b - a },
+                { text: `-${a} + ${b} = ....`, answer: -a + b },
+                { text: `-${b} + ${a} = ....`, answer: -b + a },
+                { text: `-${a} - ${b} = ....`, answer: -a - b },
+                { text: `-${b} - ${a} = ....`, answer: -b - a },
+                { text: `${a} + (-${b}) = ....`, answer: a + (-b) },
+                { text: `${b} + (-${a}) = ....`, answer: b + (-a) },
+                { text: `${a} - (-${b}) = ....`, answer: a - (-b) },
+                { text: `${b} - (-${a}) = ....`, answer: b - (-a) },
+                { text: `-${a} + (-${b}) = ....`, answer: -a + (-b) },
+                { text: `-${b} + (-${a}) = ....`, answer: -b + (-a) },
+                { text: `-${a} - (-${b}) = ....`, answer: -a - (-b) },
+                { text: `-${b} - (-${a}) = ....`, answer: -b - (-a) }
+            ];
+            
+            // Create options (same for all questions)
+            const options = [
+                { text: `${a + b}`, value: a + b },
+                { text: `${a - b}`, value: a - b },
+                { text: `${b - a}`, value: b - a },
+                { text: `${-a - b}`, value: -a - b }
+            ];
+            
+            // Shuffle questions
+            const shuffledQuestions = [...questionTemplates].sort(() => Math.random() - 0.5);
+            
+            // Create final questions array
+            quizData.questions = shuffledQuestions.map((q, index) => {
+                return {
+                    id: index + 1,
+                    text: q.text,
+                    options: options,
+                    correctAnswer: q.answer
+                };
+            });
+        }
+        
+        // Start the quiz
+        function startQuiz() {
+            const selectedClass = kelasSelect.value;
+            const selectedName = namaSelect.value;
+            
+            if (!selectedClass || !selectedName) {
+                alert("Silakan pilih kelas dan nama lengkap Anda!");
+                return;
+            }
+            
+            quizData.userName = selectedName;
+            quizData.userClass = selectedClass;
+            quizData.currentQuestion = 0;
+            quizData.correctAnswers = 0;
+            quizData.wrongAnswers = 0;
+            quizData.unanswered = 0;
+            
+            generateQuestions();
+            
+            startPage.classList.add('hidden');
+            quizPage.classList.remove('hidden');
+            
+            showQuestion();
+        }
+        
+        // Show current question
+        function showQuestion() {
+            const question = quizData.questions[quizData.currentQuestion];
+            currentQuestionEl.textContent = quizData.currentQuestion + 1;
+            
+            // Display question
+            questionContainer.textContent = question.text;
+            
+            // Clear previous options
+            optionsContainer.innerHTML = '';
+            
+            // Add options
+            question.options.forEach((option, index) => {
+                const optionBtn = document.createElement('button');
+                optionBtn.className = 'option bg-white border-2 border-indigo-200 hover:border-indigo-500 text-lg font-medium py-3 px-4 rounded-lg text-center';
+                optionBtn.textContent = option.text;
+                optionBtn.dataset.value = option.value;
+                optionBtn.addEventListener('click', () => selectAnswer(option.value));
+                optionsContainer.appendChild(optionBtn);
+            });
+            
+            // Reset and start timer
+            quizData.timeLeft = 10;
+            timerEl.textContent = quizData.timeLeft;
+            timerBar.style.width = '100%';
+            
+            if (quizData.timer) {
+                clearInterval(quizData.timer);
+            }
+            
+            quizData.timer = setInterval(() => {
+                quizData.timeLeft--;
+                timerEl.textContent = quizData.timeLeft;
+                timerBar.style.width = `${quizData.timeLeft * 10}%`;
+                
+                if (quizData.timeLeft <= 3) {
+                    timerBar.style.backgroundColor = '#ef4444';
+                } else {
+                    timerBar.style.backgroundColor = '#4ade80';
+                }
+                
+                if (quizData.timeLeft <= 0) {
+                    clearInterval(quizData.timer);
+                    handleNoAnswer();
+                }
+            }, 1000);
+        }
+        
+        // Handle answer selection
+        function selectAnswer(selectedValue) {
+            clickSound.play();
+            clearInterval(quizData.timer);
+            
+            const question = quizData.questions[quizData.currentQuestion];
+            const isCorrect = selectedValue === question.correctAnswer;
+            
+            // Find all option buttons
+            const optionButtons = optionsContainer.querySelectorAll('.option');
+            
+            // Highlight correct and wrong answers
+            optionButtons.forEach(button => {
+                const value = parseFloat(button.dataset.value);
+                
+                if (value === selectedValue) {
+                    if (isCorrect) {
+                        button.classList.remove('bg-white');
+                        button.classList.add('bg-green-500', 'text-white');
+                    } else {
+                        button.classList.remove('bg-white');
+                        button.classList.add('bg-red-500', 'text-white');
+                    }
+                }
+                
+                if (value === question.correctAnswer && !isCorrect) {
+                    button.classList.remove('bg-white');
+                    button.classList.add('bg-green-500', 'text-white');
+                }
+                
+                // Disable all buttons
+                button.disabled = true;
+            });
+            
+            // Update score
+            if (isCorrect) {
+                quizData.correctAnswers++;
+            } else {
+                quizData.wrongAnswers++;
+            }
+            
+            // Move to next question after a short delay
+            setTimeout(() => {
+                nextQuestion();
+            }, 1000);
+        }
+        
+        // Handle when no answer is selected
+        function handleNoAnswer() {
+            quizData.unanswered++;
+            
+            // Highlight the correct answer
+            const question = quizData.questions[quizData.currentQuestion];
+            const optionButtons = optionsContainer.querySelectorAll('.option');
+            
+            optionButtons.forEach(button => {
+                const value = parseFloat(button.dataset.value);
+                if (value === question.correctAnswer) {
+                    button.classList.remove('bg-white');
+                    button.classList.add('bg-green-500', 'text-white');
+                }
+                button.disabled = true;
+            });
+            
+            // Move to next question after a short delay
+            setTimeout(() => {
+                nextQuestion();
+            }, 1000);
+        }
+        
+        // Move to next question or end quiz
+        function nextQuestion() {
+            quizData.currentQuestion++;
+            
+            if (quizData.currentQuestion < quizData.questions.length) {
+                showQuestion();
+            } else {
+                endQuiz();
+            }
+        }
+        
+        // End the quiz and show results
+        function endQuiz() {
+            clearInterval(quizData.timer);
+            quizPage.classList.add('hidden');
+            resultPage.classList.remove('hidden');
+            
+            const score = Math.round((quizData.correctAnswers / quizData.questions.length) * 100);
+            const isPassed = score >= 80;
+            
+            document.getElementById('result-nama').textContent = quizData.userName;
+            document.getElementById('result-nilai').textContent = score;
+            document.getElementById('result-benar').textContent = quizData.correctAnswers;
+            document.getElementById('result-salah').textContent = quizData.wrongAnswers;
+            document.getElementById('result-kosong').textContent = quizData.unanswered;
+            
+            const resultStatus = document.getElementById('result-status');
+            if (isPassed) {
+                resultStatus.textContent = 'SELAMAT! KAMU SUDAH LULUS KUIS INI';
+                resultStatus.classList.add('bg-green-100', 'text-green-800');
+            } else {
+                resultStatus.textContent = 'MAAF, KAMU BELUM LULUS. SILAHKAN COBA LAGI';
+                resultStatus.classList.add('bg-red-100', 'text-red-800');
+            }
+        }
+        
+        // Reset quiz
+        function resetQuiz() {
+            quizData.currentQuestion = 0;
+            quizData.correctAnswers = 0;
+            quizData.wrongAnswers = 0;
+            quizData.unanswered = 0;
+            
+            resultPage.classList.add('hidden');
+            startPage.classList.remove('hidden');
+            
+            // Reset dropdowns
+            kelasSelect.value = '';
+            namaContainer.classList.add('hidden');
+            namaSelect.innerHTML = '<option value="" selected disabled>PILIH NAMA</option>';
+            startBtn.classList.add('hidden');
+        }
+        
+        // Event listeners
+        startBtn.addEventListener('click', startQuiz);
+        retryBtn.addEventListener('click', resetQuiz);
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'966d8d4ce7eb70ac',t:'MTc1MzgwMTkxOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
