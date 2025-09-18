@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soal Penjumlahan dan Pengurangan Matriks</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <style>
+        .math-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        .mjx-chtml {
+            font-size: 1.2em !important;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">
+            SOAL PENJUMLAHAN DAN PENGURANGAN MATRIKS
+        </h1>
+        
+        <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6">
+            <div class="mb-8">
+                <label for="studentSelect" class="block text-lg font-semibold text-gray-700 mb-3">
+                    Pilih Siswa:
+                </label>
+                <select id="studentSelect" class="w-full max-w-xs px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg">
+                    <option value="">-- Pilih Siswa --</option>
+                </select>
+            </div>
+            
+            <div id="questionsContainer" class="hidden space-y-8">
+                <!-- Soal 1: Penjumlahan -->
+                <div class="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-500">
+                    <h3 class="text-xl font-bold text-blue-800 mb-4">Soal 1: Penjumlahan Matriks</h3>
+                    <div id="question1" class="text-lg"></div>
+                </div>
+                
+                <!-- Soal 2: Pengurangan -->
+                <div class="bg-green-50 p-6 rounded-lg border-l-4 border-green-500">
+                    <h3 class="text-xl font-bold text-green-800 mb-4">Soal 2: Pengurangan Matriks</h3>
+                    <div id="question2" class="text-lg"></div>
+                </div>
+                
+                <!-- Soal 3: Penjumlahan dengan variabel -->
+                <div class="bg-yellow-50 p-6 rounded-lg border-l-4 border-yellow-500">
+                    <h3 class="text-xl font-bold text-yellow-800 mb-4">Soal 3: Penjumlahan dengan Variabel</h3>
+                    <div id="question3" class="text-lg"></div>
+                    <p class="mt-4 text-gray-700">Tentukan nilai a dan b!</p>
+                </div>
+                
+                <!-- Soal 4: Pengurangan dengan variabel -->
+                <div class="bg-purple-50 p-6 rounded-lg border-l-4 border-purple-500">
+                    <h3 class="text-xl font-bold text-purple-800 mb-4">Soal 4: Pengurangan dengan Variabel</h3>
+                    <div id="question4" class="text-lg"></div>
+                    <p class="mt-4 text-gray-700">Tentukan nilai a dan b!</p>
+                </div>
+                
+                <!-- Soal 5: Persamaan matriks kompleks -->
+                <div class="bg-red-50 p-6 rounded-lg border-l-4 border-red-500">
+                    <h3 class="text-xl font-bold text-red-800 mb-4">Soal 5: Persamaan Matriks A + B = C - D</h3>
+                    <div id="question5" class="text-lg"></div>
+                    <p class="mt-4 text-gray-700">Tentukan nilai a dan b!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Generate random number between min and max (excluding 0)
+        function randomNonZero(min = -10, max = 10) {
+            let num;
+            do {
+                num = Math.floor(Math.random() * (max - min + 1)) + min;
+            } while (num === 0);
+            return num;
+        }
+
+        // Generate coefficient (excluding 0 and 1)
+        function randomCoefficient(min = -10, max = 10) {
+            let num;
+            do {
+                num = Math.floor(Math.random() * (max - min + 1)) + min;
+            } while (num === 0 || num === 1);
+            return num;
+        }
+
+        // Create matrix LaTeX
+        function createMatrix(matrix, rows, cols) {
+            let latex = '\\begin{bmatrix}';
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < cols; j++) {
+                    const value = matrix[i][j];
+                    if (typeof value === 'string' && (value.includes('a') || value.includes('b'))) {
+                        latex += `\\color{red}{${value}}`;
+                    } else {
+                        latex += value;
+                    }
+                    if (j < cols - 1) latex += ' & ';
+                }
+                if (i < rows - 1) latex += ' \\\\ ';
+            }
+            latex += '\\end{bmatrix}';
+            return `$${latex}$`;
+        }
+
+        // Generate questions for a student
+        function generateQuestions(studentNum) {
+            const seed = studentNum * 1000; // Simple seed for consistency
+            Math.seedrandom = function(seed) {
+                let m = 0x80000000;
+                let a = 1103515245;
+                let c = 12345;
+                let state = seed ? seed : Math.floor(Math.random() * (m - 1));
+                return function() {
+                    state = (a * state + c) % m;
+                    return state / (m - 1);
+                };
+            };
+            
+            const rng = Math.seedrandom(seed);
+            const oldRandom = Math.random;
+            Math.random = rng;
+
+            // Question 1: Addition with random dimensions
+            const dims1 = [
+                [2, 2], [2, 3], [3, 2], [3, 3], [2, 4], [4, 2]
+            ][Math.floor(Math.random() * 6)];
+            
+            const matrixA1 = [];
+            const matrixB1 = [];
+            for (let i = 0; i < dims1[0]; i++) {
+                matrixA1[i] = [];
+                matrixB1[i] = [];
+                for (let j = 0; j < dims1[1]; j++) {
+                    matrixA1[i][j] = randomNonZero();
+                    matrixB1[i][j] = randomNonZero();
+                }
+            }
+
+            // Question 2: Subtraction with random dimensions
+            const dims2 = [
+                [2, 2], [2, 3], [3, 2], [3, 3], [2, 4], [4, 2]
+            ][Math.floor(Math.random() * 6)];
+            
+            const matrixA2 = [];
+            const matrixB2 = [];
+            for (let i = 0; i < dims2[0]; i++) {
+                matrixA2[i] = [];
+                matrixB2[i] = [];
+                for (let j = 0; j < dims2[1]; j++) {
+                    matrixA2[i][j] = randomNonZero();
+                    matrixB2[i][j] = randomNonZero();
+                }
+            }
+
+            // Question 3: Addition with variables (2x2)
+            const a3 = randomNonZero();
+            const b3 = randomNonZero();
+            const coeffA3 = randomCoefficient();
+            const coeffB3 = randomCoefficient();
+            const matrixA3 = [[randomNonZero(), coeffA3 === -1 ? '-a' : `${coeffA3}a`], [randomNonZero(), randomNonZero()]];
+            const matrixB3 = [[randomNonZero(), randomNonZero()], [coeffB3 === -1 ? '-b' : `${coeffB3}b`, randomNonZero()]];
+            const result3 = [
+                [matrixA3[0][0] + matrixB3[0][0], coeffA3 * a3 + matrixB3[0][1]],
+                [matrixA3[1][0] + coeffB3 * b3, matrixA3[1][1] + matrixB3[1][1]]
+            ];
+
+            // Question 4: Subtraction with variables (2x2)
+            const a4 = randomNonZero();
+            const b4 = randomNonZero();
+            const coeffA4 = randomCoefficient();
+            const coeffB4 = randomCoefficient();
+            const matrixA4 = [[randomNonZero(), coeffA4 === -1 ? '-a' : `${coeffA4}a`], [randomNonZero(), randomNonZero()]];
+            const matrixB4 = [[randomNonZero(), randomNonZero()], [coeffB4 === -1 ? '-b' : `${coeffB4}b`, randomNonZero()]];
+            const result4 = [
+                [matrixA4[0][0] - matrixB4[0][0], coeffA4 * a4 - matrixB4[0][1]],
+                [matrixA4[1][0] - coeffB4 * b4, matrixA4[1][1] - matrixB4[1][1]]
+            ];
+
+            // Question 5: A + B = C - D (2x2 with variables)
+            const a5 = randomNonZero();
+            const b5 = randomNonZero();
+            const coeffA5_1 = randomCoefficient();
+            const coeffB5_1 = randomCoefficient();
+            const coeffA5_2 = randomCoefficient();
+            const coeffB5_2 = randomCoefficient();
+            const matrixA5 = [[randomNonZero(), coeffA5_1 === -1 ? '-a' : `${coeffA5_1}a`], [randomNonZero(), randomNonZero()]];
+            const matrixB5 = [[randomNonZero(), coeffB5_1 === -1 ? '-b' : `${coeffB5_1}b`], [randomNonZero(), randomNonZero()]];
+            const matrixC5 = [[randomNonZero(), randomNonZero()], [coeffA5_2 === -1 ? '-a' : `${coeffA5_2}a`, randomNonZero()]];
+            const matrixD5 = [[randomNonZero(), randomNonZero()], [coeffB5_2 === -1 ? '-b' : `${coeffB5_2}b`, randomNonZero()]];
+
+            Math.random = oldRandom; // Restore original Math.random
+
+            return {
+                q1: { matrixA: matrixA1, matrixB: matrixB1, dims: dims1 },
+                q2: { matrixA: matrixA2, matrixB: matrixB2, dims: dims2 },
+                q3: { matrixA: matrixA3, matrixB: matrixB3, result: result3, a: a3, b: b3 },
+                q4: { matrixA: matrixA4, matrixB: matrixB4, result: result4, a: a4, b: b4 },
+                q5: { matrixA: matrixA5, matrixB: matrixB5, matrixC: matrixC5, matrixD: matrixD5, a: a5, b: b5 }
+            };
+        }
+
+        // Display questions
+        function displayQuestions(questions) {
+            // Question 1
+            const latex1 = `$$${createMatrix(questions.q1.matrixA, questions.q1.dims[0], questions.q1.dims[1]).slice(1, -1)} + ${createMatrix(questions.q1.matrixB, questions.q1.dims[0], questions.q1.dims[1]).slice(1, -1)} = ?$$`;
+            document.getElementById('question1').innerHTML = `<div class="math-container">${latex1}</div>`;
+
+            // Question 2
+            const latex2 = `$$${createMatrix(questions.q2.matrixA, questions.q2.dims[0], questions.q2.dims[1]).slice(1, -1)} - ${createMatrix(questions.q2.matrixB, questions.q2.dims[0], questions.q2.dims[1]).slice(1, -1)} = ?$$`;
+            document.getElementById('question2').innerHTML = `<div class="math-container">${latex2}</div>`;
+
+            // Question 3
+            const latex3 = `$$${createMatrix(questions.q3.matrixA, 2, 2).slice(1, -1)} + ${createMatrix(questions.q3.matrixB, 2, 2).slice(1, -1)} = ${createMatrix(questions.q3.result, 2, 2).slice(1, -1)}$$`;
+            document.getElementById('question3').innerHTML = `<div class="math-container">${latex3}</div>`;
+
+            // Question 4
+            const latex4 = `$$${createMatrix(questions.q4.matrixA, 2, 2).slice(1, -1)} - ${createMatrix(questions.q4.matrixB, 2, 2).slice(1, -1)} = ${createMatrix(questions.q4.result, 2, 2).slice(1, -1)}$$`;
+            document.getElementById('question4').innerHTML = `<div class="math-container">${latex4}</div>`;
+
+            // Question 5
+            const latex5 = `$$${createMatrix(questions.q5.matrixA, 2, 2).slice(1, -1)} + ${createMatrix(questions.q5.matrixB, 2, 2).slice(1, -1)} = ${createMatrix(questions.q5.matrixC, 2, 2).slice(1, -1)} - ${createMatrix(questions.q5.matrixD, 2, 2).slice(1, -1)}$$`;
+            document.getElementById('question5').innerHTML = `<div class="math-container">${latex5}</div>`;
+
+            // Re-render MathJax
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            const studentSelect = document.getElementById('studentSelect');
+            const questionsContainer = document.getElementById('questionsContainer');
+
+            // Student names
+            const studentNames = [
+                "AFIF NAI OSHADI","ALESSANDRO DELPIERO","ANGGITA ARUM SARI","APSARI PUTRI PAWESTRI",
+                "ARDOVA GHANI FIRJATULLAH","AULIA HAFIFAH","AYU LESTARI","DARUSMAN PRATAMA SIREGAR",
+                "DAVID SEBASTIAN","DAVIN ALDIANSYAH YUSUF","DINDA LESTARI","ELIEZER AMARYA GEUMILIN",
+                "FAKHRI MAULANA","IKHRAM RAMADHAN","ILONA MAYORI QURRATU AIN","JENIFER APRILLIA TATIBUN",
+                "KESYA ADWITIA KIRANI","LAILI SEPTI RAMADHANI","MUHAMAD FAJRI ABDILLAH","MUHAMAD WILDAN KALABI",
+                "MUHAMMMAD RENDI PRATAMA","NAZARA VIKRANI","OCHA VALERIN","PUTRI ANDINI",
+                "PUTRI NURAINI","RIVAN NARDIANSYAH","RIZKY ADYTI APRATAMA","SAFITRIANI AZKA",
+                "TINA RODEARNA","VIRNY NUR SEVANA","VIVI WULANSARI","YAFI RHAMADAN",
+                "YOGA ANDRIAWANSYAH","ZAHARSYAH PUTRA YUSUP"
+            ];
+
+            // Populate dropdown
+            for (let i = 0; i < studentNames.length; i++) {
+                const option = document.createElement('option');
+                option.value = i + 1;
+                option.textContent = studentNames[i];
+                studentSelect.appendChild(option);
+            }
+
+            // Handle student selection
+            studentSelect.addEventListener('change', function() {
+                if (this.value) {
+                    const questions = generateQuestions(parseInt(this.value));
+                    displayQuestions(questions);
+                    questionsContainer.classList.remove('hidden');
+                } else {
+                    questionsContainer.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9811515bd139ced3',t:'MTc1ODIwMzQ4My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
